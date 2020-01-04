@@ -4,25 +4,28 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 
 class GUIMainWindow:
     def __init__(self):
+        self.main_window = QtWidgets.QMainWindow()
         self.central_widget = None
 
-    def setup_window(self, main_window):
-        main_window.setObjectName("MainWindow")
-        main_window.resize(500, 360)
-        self.central_widget = QtWidgets.QWidget(main_window)
+    def setup_window(self):
+        self.main_window.setObjectName("MainWindow")
+        self.main_window.resize(500, 360)
+        self.central_widget = QtWidgets.QWidget(self.main_window)
         self.central_widget.setObjectName("CentralWidget")
 
-        self.retranslate_window(main_window)
+        self.retranslate_window()
 
-    def retranslate_window(self, main_window):
+    def retranslate_window(self):
         _translate = QtCore.QCoreApplication.translate
-        main_window.setWindowTitle(_translate("GSM AT", "GSM AT"))
+        self.main_window.setWindowTitle(_translate("GSM AT", "GSM AT"))
+
+    def show_window(self):
+        self.main_window.show()
 
 
 def start_app():
     app = QtWidgets.QApplication([])
-    main_window = QtWidgets.QMainWindow()
     ui = GUIMainWindow()
-    ui.setup_window(main_window)
-    main_window.show()
+    ui.setup_window()
+    ui.show_window()
     sys.exit(app.exec_())
