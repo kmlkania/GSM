@@ -2,6 +2,7 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from serialDevice import getSerialDevices
 import threading
+import time
 
 
 class GUIMainWindow:
@@ -12,6 +13,7 @@ class GUIMainWindow:
         self.discover_serial_btn = QtWidgets.QPushButton(self.central_widget)
         self.chose_device_lbl = QtWidgets.QLabel(self.central_widget)
         self.chose_device_combo = QtWidgets.QComboBox(self.central_widget)
+        self.selected_device_lbl = QtWidgets.QLabel(self.central_widget)
         self.status_lbl = QtWidgets.QLabel(self.bottom_widget)
         self.devices = []
 
@@ -22,11 +24,13 @@ class GUIMainWindow:
         self.add_discover_serial_btn()
         self.add_chose_device_lbl()
         self.add_chose_device_combo()
+        self.set_selected_device_lbl()
         self.add_status_lbl()
 
         # self.retranslate_window()
         # QtCore.QMetaObject.connectSlotsByName(self.main_window)
         self.discover_serial_btn.clicked.connect(self.set_serial_devices)
+        self.chose_device_combo.currentIndexChanged.connect(self.update_selected_device_lbl)
 
     def setup_main_window(self):
         self.main_window.setObjectName("MainWindow")
@@ -54,6 +58,13 @@ class GUIMainWindow:
         self.chose_device_combo.addItems([dev.__str__() for dev in self.devices])
         self.chose_device_combo.setGeometry(130, 30, 350, 30)
 
+    def set_selected_device_lbl(self):
+        self.selected_device_lbl.setText("Selected device:")
+        self.selected_device_lbl.setGeometry(10, 80, 200, 20)
+
+    def update_selected_device_lbl(self, index=0):
+        self.selected_device_lbl.setText("Selected device: {}".format(self.devices[index].device))
+
     def add_status_lbl(self):
         self.status_lbl.setGeometry(10, 280, 400, 20)
         self.status_lbl.setText("application started")
@@ -67,8 +78,10 @@ class GUIMainWindow:
     def discover_devices_in_bg(self):
         self.chose_device_combo.clear()
         self.devices = getSerialDevices()
+        self.devices.reverse()
         self.chose_device_combo.addItems([dev.__str__() for dev in self.devices])
         self.status_lbl.setText("device discovery finished")
+        self.update_selected_device_lbl()
         self.discover_serial_btn.setEnabled(True)
 
     def retranslate_window(self):
