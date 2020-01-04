@@ -62,7 +62,7 @@ class GUIMainWindow:
         self.selected_device_lbl.setText("Selected device:")
         self.selected_device_lbl.setGeometry(10, 80, 200, 20)
 
-    def update_selected_device_lbl(self, index=0):
+    def update_selected_device_lbl(self, index):
         self.selected_device_lbl.setText("Selected device: {}".format(self.devices[index].device))
 
     def add_status_lbl(self):
@@ -81,7 +81,6 @@ class GUIMainWindow:
         self.devices.reverse()
         self.chose_device_combo.addItems([dev.__str__() for dev in self.devices])
         self.status_lbl.setText("device discovery finished")
-        self.update_selected_device_lbl()
         self.discover_serial_btn.setEnabled(True)
 
     def retranslate_window(self):
