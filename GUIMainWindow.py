@@ -188,6 +188,7 @@ class GUIMainWindow:
                 received_lines = self.serial_conn.receive_data()
                 if received_lines:
                     self.cmd_monitor.addItems(received_lines)
+                    self.cmd_monitor.addItem('')
                     time.sleep(0.1)
                     self.cmd_monitor.scrollToBottom()
             else:
