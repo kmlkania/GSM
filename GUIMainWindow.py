@@ -2,9 +2,12 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from serialDevice import getSerialDevices, SerialGSMConnection
 import threading
-
+import time
+from datetime import datetime
 
 class GUIMainWindow:
+    cmd_monitor_max_lines = 25
+
     def __init__(self):
         self.main_window = QtWidgets.QMainWindow()
         self.central_widget = QtWidgets.QWidget(self.main_window)
@@ -21,6 +24,8 @@ class GUIMainWindow:
         self.command_lbl = QtWidgets.QLabel(self.bottom_widget)
         self.command_line = QtWidgets.QLineEdit(self.bottom_widget)
         self.send_command_btn = QtWidgets.QPushButton(self.bottom_widget)
+        self.cmd_monitor = QtWidgets.QListWidget(self.bottom_widget)
+        self.cmd_monitor_list = []
 
         self.status_lbl = QtWidgets.QLabel(self.footer_widget)
 
@@ -43,6 +48,7 @@ class GUIMainWindow:
         self.add_cmd_lbl()
         self.add_cmd_line()
         self.add_send_cmd_btn()
+        self.add_cmd_monitor_list()
 
         self.add_status_lbl()
 
@@ -121,6 +127,8 @@ class GUIMainWindow:
                 self.chose_device_combo.setEnabled(False)
                 self.status_lbl.setText("connection established with {}".format(self.selected_device))
                 self.bottom_widget.setEnabled(True)
+                thread1 = threading.Thread(target=self.update_cmd_monitor_list)
+                thread1.start()
             else:
                 self.serial_conn = None
                 self.status_lbl.setText(reason)
@@ -143,9 +151,14 @@ class GUIMainWindow:
         cmd = self.command_line.text()
         if cmd:
             self.command_line.clear()
-            print("cmd to be send: {}".format(cmd))
-            print(self.serial_conn)
+            print("send data start ", datetime.now())
             self.serial_conn.send_text_data(cmd)
+            print("send data done ", datetime.now())
+
+    def add_cmd_monitor_list(self):
+        self.cmd_monitor.setGeometry(QtCore.QRect(200, 10, 280, 250))
+        self.cmd_monitor.setObjectName("CmdMonitor")
+        self.cmd_monitor.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
 
     def add_status_lbl(self):
         self.status_lbl.setGeometry(10, 30, 400, 20)
@@ -168,6 +181,20 @@ class GUIMainWindow:
         self.status_lbl.setText("device discovery finished")
         self.discover_serial_btn.setEnabled(True)
         self.connection_btn.setEnabled(True)
+
+    def update_cmd_monitor_list(self):
+        while threading.main_thread().isAlive():
+            time.sleep(0.1)
+            if self.serial_conn:
+                received_lines = self.serial_conn.receive_data()
+                if received_lines:
+                    print("data received ", datetime.now())
+                    # self.cmd_monitor_list.extend(received_lines)
+                    # self.cmd_monitor_list = self.cmd_monitor_list[-1*self.cmd_monitor_max_lines:]
+                    self.cmd_monitor.addItems(received_lines)
+                    print("data displayed ", datetime.now())
+            else:
+                break
 
     def retranslate_window(self):
         _translate = QtCore.QCoreApplication.translate
