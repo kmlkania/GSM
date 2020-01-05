@@ -1,6 +1,6 @@
 import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
-from serialDevice import getSerialDevices
+from serialDevice import getSerialDevices, SerialGSMConnection
 import threading
 
 
@@ -13,8 +13,11 @@ class GUIMainWindow:
         self.chose_device_lbl = QtWidgets.QLabel(self.central_widget)
         self.chose_device_combo = QtWidgets.QComboBox(self.central_widget)
         self.selected_device_lbl = QtWidgets.QLabel(self.central_widget)
+        self.connection_btn = QtWidgets.QPushButton(self.central_widget)
         self.status_lbl = QtWidgets.QLabel(self.bottom_widget)
         self.devices = []
+        self.selected_device = None
+        self.serial_conn = None
 
     def setup_window(self):
         self.setup_main_window()
@@ -24,12 +27,14 @@ class GUIMainWindow:
         self.add_chose_device_lbl()
         self.add_chose_device_combo()
         self.set_selected_device_lbl()
+        self.add_connection_button()
         self.add_status_lbl()
 
         # self.retranslate_window()
         # QtCore.QMetaObject.connectSlotsByName(self.main_window)
         self.discover_serial_btn.clicked.connect(self.set_serial_devices)
         self.chose_device_combo.currentIndexChanged.connect(self.update_selected_device_lbl)
+        self.connection_btn.clicked.connect(self.change_connection)
 
     def setup_main_window(self):
         self.main_window.setObjectName("MainWindow")
@@ -62,7 +67,36 @@ class GUIMainWindow:
         self.selected_device_lbl.setGeometry(10, 80, 200, 20)
 
     def update_selected_device_lbl(self, index):
-        self.selected_device_lbl.setText("Selected device: {}".format(self.devices[index].device))
+        self.selected_device = self.devices[index].device
+        self.selected_device_lbl.setText("Selected device: {}".format(self.selected_device))
+
+    def add_connection_button(self):
+        self.connection_btn.setGeometry(QtCore.QRect(10, 110, 100, 50))
+        self.connection_btn.setText("Connect")
+        self.connection_btn.setObjectName("ConnectionBtn")
+        self.connection_btn.setEnabled(False)
+
+    def change_connection(self):
+        if self.serial_conn:
+            self.close_connection()
+        else:
+            self.open_connection()
+
+    def close_connection(self):
+        if self.serial_conn:
+            self.serial_conn = None
+            self.connection_btn.setText("Connect")
+            self.status_lbl.setText("device disconnected")
+            self.chose_device_combo.setEnabled(True)
+            self.status_lbl.setText("connection closed")
+
+    def open_connection(self):
+        if not self.serial_conn:
+            self.serial_conn = SerialGSMConnection(self.selected_device)
+            self.serial_conn.establish_connection()
+            self.connection_btn.setText("Disconnect")
+            self.chose_device_combo.setEnabled(False)
+            self.status_lbl.setText("connection opened")
 
     def add_status_lbl(self):
         self.status_lbl.setGeometry(10, 280, 400, 20)
@@ -70,6 +104,9 @@ class GUIMainWindow:
 
     def set_serial_devices(self):
         self.discover_serial_btn.setEnabled(False)
+        self.connection_btn.setEnabled(False)
+        self.selected_device = None
+        self.close_connection()
         self.status_lbl.setText("device discovery started")
         thread1 = threading.Thread(target=self.discover_devices_in_bg)
         thread1.start()
@@ -81,6 +118,7 @@ class GUIMainWindow:
         self.chose_device_combo.addItems([dev.__str__() for dev in self.devices])
         self.status_lbl.setText("device discovery finished")
         self.discover_serial_btn.setEnabled(True)
+        self.connection_btn.setEnabled(True)
 
     def retranslate_window(self):
         _translate = QtCore.QCoreApplication.translate
