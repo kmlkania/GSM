@@ -9,12 +9,20 @@ class GUIMainWindow:
         self.main_window = QtWidgets.QMainWindow()
         self.central_widget = QtWidgets.QWidget(self.main_window)
         self.bottom_widget = QtWidgets.QWidget(self.main_window)
+        self.bottom_widget.setEnabled(False)
+        self.footer_widget = QtWidgets.QWidget(self.main_window)
+
         self.discover_serial_btn = QtWidgets.QPushButton(self.central_widget)
         self.chose_device_lbl = QtWidgets.QLabel(self.central_widget)
         self.chose_device_combo = QtWidgets.QComboBox(self.central_widget)
         self.selected_device_lbl = QtWidgets.QLabel(self.central_widget)
         self.connection_btn = QtWidgets.QPushButton(self.central_widget)
-        self.status_lbl = QtWidgets.QLabel(self.bottom_widget)
+
+        self.command_lbl = QtWidgets.QLabel(self.bottom_widget)
+        self.lineEdit = QtWidgets.QLineEdit(self.bottom_widget)
+
+        self.status_lbl = QtWidgets.QLabel(self.footer_widget)
+
         self.devices = []
         self.selected_device = None
         self.serial_conn = None
@@ -23,11 +31,17 @@ class GUIMainWindow:
         self.setup_main_window()
         self.setup_central_widget()
         self.setup_bottom_widget()
+        self.setup_footer_widget()
+
         self.add_discover_serial_btn()
         self.add_chose_device_lbl()
         self.add_chose_device_combo()
         self.set_selected_device_lbl()
         self.add_connection_button()
+
+        self.add_cmd_lbl()
+        self.add_cmd_line()
+
         self.add_status_lbl()
 
         # self.retranslate_window()
@@ -38,7 +52,7 @@ class GUIMainWindow:
 
     def setup_main_window(self):
         self.main_window.setObjectName("MainWindow")
-        self.main_window.setGeometry(0, 0, 500, 500)
+        self.main_window.setGeometry(0, 0, 500, 550)
         self.main_window.setWindowTitle("GSM AT")
 
     def setup_central_widget(self):
@@ -48,6 +62,10 @@ class GUIMainWindow:
     def setup_bottom_widget(self):
         self.bottom_widget.setObjectName("BottomWidget")
         self.bottom_widget.setGeometry(0, 200, 500, 300)
+
+    def setup_footer_widget(self):
+        self.footer_widget.setObjectName("FooterWidget")
+        self.footer_widget.setGeometry(0, 500, 500, 50)
 
     def add_discover_serial_btn(self):
         self.discover_serial_btn.setGeometry(QtCore.QRect(10, 10, 100, 50))
@@ -89,6 +107,7 @@ class GUIMainWindow:
             self.status_lbl.setText("device disconnected")
             self.chose_device_combo.setEnabled(True)
             self.status_lbl.setText("connection closed")
+            self.bottom_widget.setEnabled(False)
 
     def open_connection(self):
         if not self.serial_conn:
@@ -97,9 +116,18 @@ class GUIMainWindow:
             self.connection_btn.setText("Disconnect")
             self.chose_device_combo.setEnabled(False)
             self.status_lbl.setText("connection opened")
+            self.bottom_widget.setEnabled(True)
+
+    def add_cmd_lbl(self):
+        self.command_lbl.setGeometry(10, 10, 400, 20)
+        self.command_lbl.setText("Type Your Command")
+
+    def add_cmd_line(self):
+        self.lineEdit.setGeometry(QtCore.QRect(10, 30, 160, 20))
+        self.lineEdit.setObjectName("CommandLine")
 
     def add_status_lbl(self):
-        self.status_lbl.setGeometry(10, 280, 400, 20)
+        self.status_lbl.setGeometry(10, 30, 400, 20)
         self.status_lbl.setText("application started")
 
     def set_serial_devices(self):
