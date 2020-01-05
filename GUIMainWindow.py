@@ -1,9 +1,9 @@
 import sys
-from PyQt5 import QtCore, QtGui, QtWidgets
+from PyQt5 import QtCore, QtWidgets
 from serialDevice import getSerialDevices, SerialGSMConnection
 import threading
 import time
-from datetime import datetime
+
 
 class GUIMainWindow:
     cmd_monitor_max_lines = 25
@@ -58,6 +58,7 @@ class GUIMainWindow:
         self.chose_device_combo.currentIndexChanged.connect(self.update_selected_device_lbl)
         self.connection_btn.clicked.connect(self.change_connection)
         self.send_command_btn.clicked.connect(self.send_command)
+        self.command_line.returnPressed.connect(self.send_command)
 
     def setup_main_window(self):
         self.main_window.setObjectName("MainWindow")
@@ -151,14 +152,13 @@ class GUIMainWindow:
         cmd = self.command_line.text()
         if cmd:
             self.command_line.clear()
-            print("send data start ", datetime.now())
             self.serial_conn.send_text_data(cmd)
-            print("send data done ", datetime.now())
 
     def add_cmd_monitor_list(self):
         self.cmd_monitor.setGeometry(QtCore.QRect(200, 10, 280, 250))
         self.cmd_monitor.setObjectName("CmdMonitor")
         self.cmd_monitor.setSelectionMode(QtWidgets.QAbstractItemView.NoSelection)
+        self.cmd_monitor.setAutoScroll(True)
 
     def add_status_lbl(self):
         self.status_lbl.setGeometry(10, 30, 400, 20)
@@ -184,15 +184,12 @@ class GUIMainWindow:
 
     def update_cmd_monitor_list(self):
         while threading.main_thread().isAlive():
-            time.sleep(0.1)
             if self.serial_conn:
                 received_lines = self.serial_conn.receive_data()
                 if received_lines:
-                    print("data received ", datetime.now())
-                    # self.cmd_monitor_list.extend(received_lines)
-                    # self.cmd_monitor_list = self.cmd_monitor_list[-1*self.cmd_monitor_max_lines:]
                     self.cmd_monitor.addItems(received_lines)
-                    print("data displayed ", datetime.now())
+                    time.sleep(0.1)
+                    self.cmd_monitor.scrollToBottom()
             else:
                 break
 

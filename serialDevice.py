@@ -14,7 +14,7 @@ class SerialGSMConnection:
 
     def establish_connection(self):
         try:
-            self.conn = serial.Serial(port=self.port, baudrate=self.baudrate, bytesize=8, timeout=2,
+            self.conn = serial.Serial(port=self.port, baudrate=self.baudrate, bytesize=8, timeout=0.2,
                                   stopbits=serial.STOPBITS_ONE)
             return 1, None
         except serial.SerialException as e:
