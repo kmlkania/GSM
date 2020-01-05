@@ -13,8 +13,12 @@ class SerialGSMConnection:
         self.baudrate = baudrate
 
     def establish_connection(self):
-        self.conn = serial.Serial(port=self.port, baudrate=self.baudrate, bytesize=8, timeout=2,
+        try:
+            self.conn = serial.Serial(port=self.port, baudrate=self.baudrate, bytesize=8, timeout=2,
                                   stopbits=serial.STOPBITS_ONE)
+            return 1, None
+        except serial.SerialException as e:
+            return 0, e.__str__()
 
     def close_connection(self):
         self.conn.close()
@@ -33,7 +37,7 @@ if __name__ == "__main__":
     # print([dev.__str__() for dev in devices])
     # for dev in devices:
     #     print("baud rate: {}".format(dev.device))
-    ser = SerialGSMConnection('COM3')
+    ser = SerialGSMConnection('COM8')
     ser.establish_connection()
     import time
     time.sleep(3)

@@ -19,7 +19,8 @@ class GUIMainWindow:
         self.connection_btn = QtWidgets.QPushButton(self.central_widget)
 
         self.command_lbl = QtWidgets.QLabel(self.bottom_widget)
-        self.lineEdit = QtWidgets.QLineEdit(self.bottom_widget)
+        self.command_line = QtWidgets.QLineEdit(self.bottom_widget)
+        self.send_command_btn = QtWidgets.QPushButton(self.bottom_widget)
 
         self.status_lbl = QtWidgets.QLabel(self.footer_widget)
 
@@ -41,6 +42,7 @@ class GUIMainWindow:
 
         self.add_cmd_lbl()
         self.add_cmd_line()
+        self.add_send_cmd_btn()
 
         self.add_status_lbl()
 
@@ -49,6 +51,7 @@ class GUIMainWindow:
         self.discover_serial_btn.clicked.connect(self.set_serial_devices)
         self.chose_device_combo.currentIndexChanged.connect(self.update_selected_device_lbl)
         self.connection_btn.clicked.connect(self.change_connection)
+        self.send_command_btn.clicked.connect(self.send_command)
 
     def setup_main_window(self):
         self.main_window.setObjectName("MainWindow")
@@ -112,19 +115,37 @@ class GUIMainWindow:
     def open_connection(self):
         if not self.serial_conn:
             self.serial_conn = SerialGSMConnection(self.selected_device)
-            self.serial_conn.establish_connection()
-            self.connection_btn.setText("Disconnect")
-            self.chose_device_combo.setEnabled(False)
-            self.status_lbl.setText("connection opened")
-            self.bottom_widget.setEnabled(True)
+            success, reason = self.serial_conn.establish_connection()
+            if success:
+                self.connection_btn.setText("Disconnect")
+                self.chose_device_combo.setEnabled(False)
+                self.status_lbl.setText("connection established with {}".format(self.selected_device))
+                self.bottom_widget.setEnabled(True)
+            else:
+                self.serial_conn = None
+                self.status_lbl.setText(reason)
+                QtWidgets.QMessageBox.about(self.main_window, "Error", reason)
 
     def add_cmd_lbl(self):
         self.command_lbl.setGeometry(10, 10, 400, 20)
         self.command_lbl.setText("Type Your Command")
 
     def add_cmd_line(self):
-        self.lineEdit.setGeometry(QtCore.QRect(10, 30, 160, 20))
-        self.lineEdit.setObjectName("CommandLine")
+        self.command_line.setGeometry(QtCore.QRect(10, 30, 160, 20))
+        self.command_line.setObjectName("CommandLine")
+
+    def add_send_cmd_btn(self):
+        self.send_command_btn.setGeometry(QtCore.QRect(10, 50, 100, 30))
+        self.send_command_btn.setText("Send")
+        self.send_command_btn.setObjectName("SendCmdBtn")
+
+    def send_command(self):
+        cmd = self.command_line.text()
+        if cmd:
+            self.command_line.clear()
+            print("cmd to be send: {}".format(cmd))
+            print(self.serial_conn)
+            self.serial_conn.send_text_data(cmd)
 
     def add_status_lbl(self):
         self.status_lbl.setGeometry(10, 30, 400, 20)
