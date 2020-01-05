@@ -2,7 +2,6 @@ import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from serialDevice import getSerialDevices
 import threading
-import time
 
 
 class GUIMainWindow:
@@ -51,8 +50,8 @@ class GUIMainWindow:
         self.discover_serial_btn.setObjectName("DiscoverSerialBtn")
 
     def add_chose_device_lbl(self):
-        self.chose_device_lbl.setText("SERIAL DEVICES")
-        self.chose_device_lbl.setGeometry(130, 10, 100, 20)
+        self.chose_device_lbl.setText("Select SERIAL DEVICE")
+        self.chose_device_lbl.setGeometry(130, 10, 200, 20)
 
     def add_chose_device_combo(self):
         self.chose_device_combo.addItems([dev.__str__() for dev in self.devices])
