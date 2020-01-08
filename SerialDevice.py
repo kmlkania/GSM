@@ -15,7 +15,7 @@ class SerialGSMConnection:
     def establish_connection(self):
         try:
             self.conn = serial.Serial(port=self.port, baudrate=self.baudrate, bytesize=8, timeout=0.2,
-                                  stopbits=serial.STOPBITS_ONE)
+                                      stopbits=serial.STOPBITS_ONE)
             return 1, None
         except serial.SerialException as e:
             return 0, e.__str__()
@@ -30,23 +30,3 @@ class SerialGSMConnection:
     def receive_data(self):
         if self.conn.isOpen():
             return [line.decode().replace('\r\n', '') for line in self.conn.readlines()]
-
-
-if __name__ == "__main__":
-    # devices = list(port_list.comports())
-    # print([dev.__str__() for dev in devices])
-    # for dev in devices:
-    #     print("baud rate: {}".format(dev.device))
-    ser = SerialGSMConnection('COM8')
-    ser.establish_connection()
-    import time
-    time.sleep(3)
-    ser.send_text_data('AT')
-    time.sleep(3)
-    print(ser.receive_data())
-    # time.sleep(3)
-    ser.send_text_data('AT+CPIN')
-    time.sleep(3)
-    print(ser.receive_data())
-    time.sleep(3)
-    print(ser.receive_data())
