@@ -42,3 +42,16 @@ def test_button_search_clicked(qtbot):
             qtbot.mouseClick(widget.head_widget_elements['discover_serial_btn'], QtCore.Qt.LeftButton)
             search_devices.assert_called_once()
 
+
+def test_no_connection_attempt_when_inactive_connection_btn_clicked(qtbot):
+    from PyQt5 import QtWidgets, QtCore
+    with mock.patch('DeviceManager.DeviceManager.__init__', return_value=None):
+        with mock.patch('DeviceManager.DeviceManager.set_serial_devices'):
+            with mock.patch('DeviceManager.DeviceManager.change_connection') as connection_change:
+                widget = GUIWidget(QtWidgets.QMainWindow())
+                widget.setup_head_widget()
+                widget.setup_bottom_widget()
+                widget.setup_footer_widget()
+                widget.setup_actions()
+                qtbot.mouseClick(widget.head_widget_elements['connection_btn'], QtCore.Qt.LeftButton)
+                connection_change.assert_not_called()
