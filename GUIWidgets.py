@@ -59,6 +59,10 @@ class GUIWidget:
         self.bottom_widget_elements['cmd_monitor'] = GUIElements.add_list_w(
             self.bottom_widget, QtCore.QRect(200, 10, 280, 250), QtWidgets.QAbstractItemView.NoSelection, "CmdMonitor")
         self.bottom_widget_elements['cmd_monitor'].setAutoScroll(True)
+        self.bottom_widget_elements['ussd_lbl'] = \
+            GUIElements.add_lbl(self.bottom_widget, QtCore.QRect(10, 90, 400, 20), "Type Your USSD")
+        self.bottom_widget_elements['ussd_line'] = \
+            GUIElements.add_line_edit(self.bottom_widget, QtCore.QRect(10, 110, 160, 20), "USSDLine")
 
     def setup_footer_widget_content(self):
         self.footer_widget_elements['status_lbl'] = \
@@ -67,16 +71,23 @@ class GUIWidget:
     def setup_actions(self):
         self.head_widget_elements['discover_serial_btn'].clicked.connect(self.device_manager.set_serial_devices)
         self.head_widget_elements['chose_device_combo'].currentIndexChanged.connect(
-            self.device_manager.update_selected_device_lbl)
+            self.device_manager.update_selected_device)
         self.head_widget_elements['connection_btn'].clicked.connect(self.device_manager.change_connection)
         self.bottom_widget_elements['send_command_btn'].clicked.connect(self.send_command)
         self.bottom_widget_elements['command_line'].returnPressed.connect(self.send_command)
+        self.bottom_widget_elements['ussd_line'].returnPressed.connect(self.send_ussd)
 
     def send_command(self):
         cmd = self.bottom_widget_elements['command_line'].text()
         if cmd:
             self.bottom_widget_elements['command_line'].clear()
             self.device_manager.send_command(cmd)
+
+    def send_ussd(self):
+        ussd = self.bottom_widget_elements['ussd_line'].text()
+        if ussd:
+            self.bottom_widget_elements['ussd_line'].clear()
+            self.device_manager.send_command('AT+CUSD=1,"{}"'.format(ussd))
 
     def update_cmd_monitor_list(self):
         while threading.main_thread().isAlive():
@@ -93,3 +104,13 @@ class GUIWidget:
     def pop_up_alert(self, title, message):
         self.footer_widget_elements['status_lbl'].setText(message)
         QtWidgets.QMessageBox.about(self.main_window, title, message)
+
+    def update_devices_combo_box(self, devices):
+        self.head_widget_elements['chose_device_combo'].clear()
+        self.head_widget_elements['chose_device_combo'].addItems(devices)
+        self.footer_widget_elements['status_lbl'].setText("device discovery finished")
+        self.head_widget_elements['discover_serial_btn'].setEnabled(True)
+        self.head_widget_elements['connection_btn'].setEnabled(True)
+
+    def update_selected_device_lbl(self, selected_device):
+        self.head_widget_elements['selected_device_lbl'].setText("Selected device: {}".format(selected_device))

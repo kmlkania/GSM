@@ -19,18 +19,13 @@ class DeviceManager:
         thread1.start()
 
     def discover_devices_in_bg(self):
-        self.gui_widget.head_widget_elements['chose_device_combo'].clear()
         self.devices = getSerialDevices()
         self.devices.reverse()
-        self.gui_widget.head_widget_elements['chose_device_combo'].addItems([dev.__str__() for dev in self.devices])
-        self.gui_widget.footer_widget_elements['status_lbl'].setText("device discovery finished")
-        self.gui_widget.head_widget_elements['discover_serial_btn'].setEnabled(True)
-        self.gui_widget.head_widget_elements['connection_btn'].setEnabled(True)
+        self.gui_widget.update_devices_combo_box([dev.__str__() for dev in self.devices])
 
-    def update_selected_device_lbl(self, index):
+    def update_selected_device(self, index):
         self.selected_device = self.devices[index].device
-        self.gui_widget.head_widget_elements['selected_device_lbl'].setText("Selected device: {}".format(
-            self.selected_device))
+        self.gui_widget.update_selected_device_lbl(self.selected_device)
 
     def change_connection(self):
         if self.serial_conn:
