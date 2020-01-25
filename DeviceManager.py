@@ -67,3 +67,6 @@ class DeviceManager:
 
     def send_command(self, cmd):
         self.serial_conn.send_text_data(cmd)
+
+    def send_sms_message(self, message):
+        self.serial_conn.send_message_data(message)

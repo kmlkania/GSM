@@ -29,4 +29,14 @@ class SerialGSMConnection:
 
     def receive_data(self):
         if self.conn.isOpen():
-            return [line.decode().replace('\r\n', '') for line in self.conn.readlines()]
+            received_text = []
+            for line in self.conn.readlines():
+                try:
+                    received_text.append(line.decode().replace('\r\n', ''))
+                except UnicodeDecodeError:
+                    received_text.append('\u2622')
+            return received_text
+
+    def send_message_data(self, data):
+        if self.conn.isOpen():
+            self.conn.write("{}{}".format(data, "\u001a").encode())

@@ -18,7 +18,7 @@ class GUIMainWindow:
 
     def setup_main_window(self):
         self.main_window.setObjectName("MainWindow")
-        self.main_window.setGeometry(0, 0, 500, 550)
+        self.main_window.setGeometry(0, 0, 550, 550)
         self.main_window.setWindowTitle("GSM AT")
 
     def show_window(self):
